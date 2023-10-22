@@ -4,14 +4,17 @@ import entity.User;
 import entity.UserFactory;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.clear_users.ClearUserDataAccessInterface;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
-public class FileUserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface {
+public class FileUserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface,
+        ClearUserDataAccessInterface {
 
     private final File csvFile;
 
@@ -85,6 +88,32 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface, 
         }
     }
 
+    @Override
+    public ArrayList<String> clearallusers() {
+        ArrayList<String> deletedUsers = new ArrayList<String>();
+        BufferedReader reader;
+        BufferedWriter writer;
+        try {
+            reader = new BufferedReader(new FileReader(csvFile));
+            String line;
+            line = reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
+                System.out.println(values[0]);
+                deletedUsers.add(values[0]);
+            }
+            reader.close();
+
+            writer = new BufferedWriter(new FileWriter(csvFile));
+            writer.write("username,password,creation_time\n");
+            writer.close();
+
+        } catch (IOException e) {
+            new RuntimeException(e);
+        }
+        return deletedUsers;
+    }
 
     /**
      * Return whether a user exists with username identifier.
